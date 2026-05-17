@@ -83,6 +83,11 @@
       font-size: 14px;
     }
     .btn-primary { background: #0f172a; color: #fff; }
+    .btn-primary:disabled {
+      background: #cbd5e1;
+      color: #64748b;
+      cursor: not-allowed;
+    }
     .btn-outline { background: #fff; color: #0f172a; border: 1px solid #cbd5e1; }
     .btn-primary:hover { background: #1e293b; }
     .btn-outline:hover { background: #f1f5f9; }
@@ -305,23 +310,24 @@
       <div class="form-grid">
         <div>
           <label for="kInput">K: จำนวนรายการประเมิน</label>
-          <input id="kInput" type="number" min="1" value="4" />
+          <input id="kInput" type="number" min="1" required placeholder="กรอก K" oninput="validateParams()" />
         </div>
         <div>
           <label for="nInput">N: จำนวนกลุ่มตัวอย่าง</label>
-          <input id="nInput" type="number" min="1" value="5" />
+          <input id="nInput" type="number" min="1" required placeholder="กรอก N" oninput="validateParams()" />
         </div>
         <div>
           <label for="mInput">M: จำนวนผู้ประเมิน</label>
-          <input id="mInput" type="number" min="2" value="3" />
+          <input id="mInput" type="number" min="2" required placeholder="กรอก M" oninput="validateParams()" />
         </div>
         <div>
           <label for="iInput">I: จำนวนคะแนนที่เป็นไปได้</label>
-          <input id="iInput" type="number" min="2" value="4" />
+          <input id="iInput" type="number" min="2" required placeholder="กรอก I" oninput="validateParams()" />
         </div>
       </div>
       <div class="buttons">
-        <button class="btn-primary" onclick="createTables()">สร้างตาราง</button>
+        <button id="createBtn" class="btn-primary" onclick="createTables()" disabled>สร้างตาราง</button>
+        <span id="paramError" class="help-text" style="align-self:center; color:#dc2626; margin:0;">กรุณากรอก K, N, M, I ให้ครบก่อน</span>
         <button class="btn-outline" onclick="resetAll()">เริ่มใหม่</button>
       </div>
     </div>
@@ -330,10 +336,10 @@
   </div>
 
   <script>
-    let K = 4;
-    let N = 5;
-    let M = 3;
-    let I = 4;
+    let K = 0;
+    let N = 0;
+    let M = 0;
+    let I = 0;
     let created = false;
     let scores = {};
 
@@ -351,11 +357,33 @@
       renderApp();
     }
 
+    function validateParams() {
+      const kValue = Number(document.getElementById('kInput').value);
+      const nValue = Number(document.getElementById('nInput').value);
+      const mValue = Number(document.getElementById('mInput').value);
+      const iValue = Number(document.getElementById('iInput').value);
+
+      const valid =
+        Number.isInteger(kValue) && kValue >= 1 &&
+        Number.isInteger(nValue) && nValue >= 1 &&
+        Number.isInteger(mValue) && mValue >= 2 &&
+        Number.isInteger(iValue) && iValue >= 2;
+
+      document.getElementById('createBtn').disabled = !valid;
+      document.getElementById('paramError').style.display = valid ? 'none' : 'inline';
+      return valid;
+    }
+
     function createTables() {
-      K = Math.max(1, Number(document.getElementById('kInput').value) || 1);
-      N = Math.max(1, Number(document.getElementById('nInput').value) || 1);
-      M = Math.max(2, Number(document.getElementById('mInput').value) || 2);
-      I = Math.max(2, Number(document.getElementById('iInput').value) || 2);
+      if (!validateParams()) {
+        alert('กรุณากรอกค่า K, N, M, I ให้ครบและถูกต้องก่อนสร้างตาราง');
+        return;
+      }
+
+      K = Number(document.getElementById('kInput').value);
+      N = Number(document.getElementById('nInput').value);
+      M = Number(document.getElementById('mInput').value);
+      I = Number(document.getElementById('iInput').value);
       created = true;
       scores = {};
       renderApp();
@@ -365,7 +393,10 @@
       created = false;
       scores = {};
       document.getElementById('appArea').innerHTML = '';
+      validateParams();
     }
+
+    validateParams();
 
     function calculateMeans() {
       const means = {};
