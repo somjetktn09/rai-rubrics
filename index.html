@@ -619,7 +619,7 @@
       }
       html += `</tr>`;
 
-      html += `<tr><th class="sticky-left sum-cell" colspan="${(K * N) + 1}" style="text-align:right; padding-right:20px;">ค่ารวม ΣΣΣ |Rmnk − R̄nk|</th><td class="sum-cell">${format2(result.absSum)}</td></tr>`;
+      html += `<tr><th class="sum-cell" colspan="${(K * N) + 1}" style="text-align:center; font-size:16px; padding:14px;">ค่ารวม ΣΣΣ |Rmnk − R̄nk| = ${format2(result.absSum)}</th></tr>`;
 
       html += `
               </tbody>
