@@ -302,9 +302,8 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>ระบบคำนวณความเชื่อมั่น Rubrics Score ด้วยดัชนี RAI</h1>
+      <h1>เครื่องคำนวณความเชื่อมั่น Rubrics Score ด้วยดัชนี RAI</h1>
       <p>กรอก K, N, M, I เพื่อสร้างตารางคะแนน แล้วระบบจะคำนวณ mean, absolute, ผลรวม และค่า RAI ให้ทันที</p>
-      <p>พัฒนาระบบโดย นายสมเจตน์ คำทะเนตร แนวคิดโดย รศ.ดร.สำราญ กำจัดภัย, ดร.พัทธนันท์ ชมภูนุช</p>
     </div>
 
     <div class="card">
@@ -337,6 +336,13 @@
   </div>
 
   <script>
+    function roundUp2(num) {
+      return Math.round((num + Number.EPSILON) * 100) / 100;
+    }
+
+    function format2(num) {
+      return roundUp2(num).toFixed(2);
+    }
     let K = 0;
     let N = 0;
     let M = 0;
@@ -551,7 +557,7 @@
       for (let k = 1; k <= K; k++) {
         for (let n = 1; n <= N; n++) {
           const mean = means[`${k}-${n}`];
-          html += `<td class="mean-cell">${mean === null ? '-' : mean.toFixed(2)}</td>`;
+          html += `<td class="mean-cell">${mean === null ? '-' : format2(mean)}</td>`;
         }
       }
       html += `
@@ -599,19 +605,19 @@
             const score = getScore(k, n, m);
             const mean = means[`${k}-${n}`];
             const abs = score !== '' && mean !== null ? Math.abs(Number(score) - mean) : null;
-            html += `<td>${abs === null ? '-' : abs.toFixed(2)}</td>`;
+            html += `<td>${abs === null ? '-' : format2(abs)}</td>`;
           }
         }
-        html += `<td class="sum-cell">${result.rowSums[m].toFixed(2)}</td></tr>`;
+        html += `<td class="sum-cell">${format2(result.rowSums[m])}</td></tr>`;
       }
 
       html += `<tr><th class="sticky-left sum-cell">รวม</th>`;
       for (let k = 1; k <= K; k++) {
         for (let n = 1; n <= N; n++) {
-          html += `<td class="sum-cell">${result.columnSums[`${k}-${n}`].toFixed(2)}</td>`;
+          html += `<td class="sum-cell">${format2(result.columnSums[`${k}-${n}`])}</td>`;
         }
       }
-      html += `<td class="sum-cell">${result.absSum.toFixed(2)}</td></tr>`;
+      html += `<td class="sum-cell">${format2(result.absSum)}</td></tr>`;
 
       html += `
               </tbody>
@@ -632,15 +638,15 @@
             </div>
             <div class="summary-card center">
               <div style="color:#64748b; transform: scale(.95);">${tripleSumSymbol(true)}</div>
-              <div class="summary-value" style="font-size:24px;">${result.absSum.toFixed(2)}</div>
+              <div class="summary-value" style="font-size:24px;">${format2(result.absSum)}</div>
             </div>
             <div class="summary-card">
               <div class="summary-label">ตัวหาร KN(M-1)(I-1)</div>
-              <div class="summary-value">${result.denominator.toFixed(2)}</div>
+              <div class="summary-value">${format2(result.denominator)}</div>
             </div>
             <div class="summary-card rai">
               <div class="summary-label">ค่า RAI</div>
-              <div class="summary-value">${result.rai === null ? 'กรอกข้อมูลให้ครบ' : result.rai.toFixed(4)}</div>
+              <div class="summary-value">${result.rai === null ? 'กรอกข้อมูลให้ครบ' : format2(result.rai)}</div>
             </div>
           </div>
 
@@ -654,7 +660,7 @@
             <div class="formula-box white" style="margin-top:18px;">
               <h3>วิธีทำและการแทนค่าในสูตร</h3>
               <div style="text-align:center; font-weight:700; font-size:18px; margin:18px 0;">
-                ${tripleSumSymbol(true)} = ${result.absSum.toFixed(2)}
+                ${tripleSumSymbol(true)} = ${format2(result.absSum)}
               </div>
               <div class="formula-box">
                 ${raiFormula(tripleSumSymbol(false), 'KN(M−1)(I−1)')}
@@ -663,19 +669,19 @@
                 <div class="calc-line">
                   <span>RAI</span><span>=</span><span>1 −</span>
                   <span class="fraction medium">
-                    <span class="top">${result.absSum.toFixed(2)}</span>
+                    <span class="top">${format2(result.absSum)}</span>
                     <span class="bottom">${K} × ${N} × (${M} − 1) × (${I} − 1)</span>
                   </span>
                 </div>
                 <div class="calc-line">
                   <span>RAI</span><span>=</span><span>1 −</span>
                   <span class="fraction small">
-                    <span class="top">${result.absSum.toFixed(2)}</span>
-                    <span class="bottom">${result.denominator.toFixed(2)}</span>
+                    <span class="top">${format2(result.absSum)}</span>
+                    <span class="bottom">${format2(result.denominator)}</span>
                   </span>
                 </div>
                 <div class="final-line">
-                  RAI = 1 − ${(result.absSum / result.denominator).toFixed(4)} = <span class="green">${result.rai.toFixed(4)}</span>
+                  RAI = 1 − ${format2(result.absSum / result.denominator)} = <span class="green">${format2(result.rai)}</span>
                 </div>
               </div>
             </div>
