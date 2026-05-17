@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAI Rubrics Calculator</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Tahoma, Arial, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 28px 18px 60px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: 32px;
+      line-height: 1.25;
+    }
+    .header p {
+      margin: 0;
+      color: #64748b;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+      padding: 20px;
+      margin-bottom: 22px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+    input[type="number"], textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+    }
+    input[type="number"]:focus, textarea:focus {
+      border-color: #94a3b8;
+      box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.25);
+    }
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+      margin-top: 6px;
+    }
+    .buttons {
+      margin-top: 16px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .btn-primary { background: #0f172a; color: #fff; }
+    .btn-outline { background: #fff; color: #0f172a; border: 1px solid #cbd5e1; }
+    .btn-primary:hover { background: #1e293b; }
+    .btn-outline:hover { background: #f1f5f9; }
+    h2, h3 { margin: 0 0 14px; }
+    .excel-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .help-text {
+      margin: 8px 0 0;
+      font-size: 13px;
+      color: #64748b;
+    }
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      background: #fff;
+    }
+    table {
+      border-collapse: collapse;
+      width: max-content;
+      min-width: 100%;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 8px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    th { background: #f1f5f9; }
+    .sticky-left {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+    }
+    .mean-cell { background: #ecfdf5; font-weight: 700; }
+    .sum-cell { background: #fffbeb; font-weight: 700; }
+    .score-input {
+      width: 72px;
+      text-align: center;
+      padding: 8px;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+    .summary-card {
+      min-height: 135px;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      background: #fff;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .summary-card.center { align-items: center; text-align: center; }
+    .summary-card.rai {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+    }
+    .summary-label {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .summary-value {
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .rai .summary-label { color: #047857; }
+    .rai .summary-value { color: #065f46; font-size: 38px; }
+    .formula-section {
+      margin-top: 22px;
+      color: #475569;
+    }
+    .formula-box {
+      overflow: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 20px;
+      margin-top: 14px;
+      background: #f8fafc;
+    }
+    .formula-box.white { background: #fff; }
+    .triple-sum {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .sum-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .sigma-unit {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      width: 36px;
+    }
+    .sigma-top { font-size: 14px; line-height: 1; margin-bottom: 2px; }
+    .sigma-main {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 34px;
+      line-height: .72;
+      font-weight: 400;
+    }
+    .sigma-bottom { font-size: 12px; line-height: 1; margin-top: 6px; }
+    .abs-part {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transform: translateY(-5px);
+    }
+    .abs-bar { font-size: 36px; line-height: 1; }
+    .abs-text { font-size: 28px; line-height: 1; }
+    .small-symbol { gap: 4px; }
+    .small-symbol .sum-group { gap: 4px; }
+    .small-symbol .sigma-unit { width: 20px; }
+    .small-symbol .sigma-top { font-size: 8px; margin-bottom: 1px; }
+    .small-symbol .sigma-main { font-size: 18px; }
+    .small-symbol .sigma-bottom { font-size: 7px; margin-top: 5px; }
+    .small-symbol .abs-part { gap: 4px; transform: translateY(-2px); }
+    .small-symbol .abs-bar { font-size: 18px; }
+    .small-symbol .abs-text { font-size: 12px; }
+    .rai-formula {
+      min-width: max-content;
+      text-align: center;
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    .fraction {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 460px;
+      vertical-align: middle;
+    }
+    .fraction .top {
+      width: 100%;
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 8px;
+      text-align: center;
+    }
+    .fraction .bottom {
+      width: 100%;
+      padding-top: 8px;
+      text-align: center;
+    }
+    .fraction.medium { min-width: 260px; }
+    .fraction.small { min-width: 220px; }
+    .calc-line {
+      margin-top: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      font-weight: 700;
+      font-size: 24px;
+    }
+    .final-line {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 800;
+    }
+    .green { color: #065f46; }
+    .table2-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .table2-title h2 { margin: 0; }
+    .title-abs {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 20px;
+      font-weight: 700;
+      transform: scale(.85);
+      transform-origin: left center;
+    }
+    .title-abs .bar { font-size: 40px; line-height: 1; }
+    @media (max-width: 900px) {
+      .form-grid, .summary-grid { grid-template-columns: 1fr; }
+      .header h1 { font-size: 24px; }
+      .rai-formula { font-size: 22px; }
+      .fraction { min-width: 360px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>เครื่องคำนวณความเชื่อมั่น Rubrics Score ด้วยดัชนี RAI</h1>
+      <p>กรอก K, N, M, I เพื่อสร้างตารางคะแนน แล้วระบบจะคำนวณ mean, absolute, ผลรวม และค่า RAI ให้ทันที</p>
+    </div>
+
+    <div class="card">
+      <div class="form-grid">
+        <div>
+          <label for="kInput">K: จำนวนรายการประเมิน</label>
+          <input id="kInput" type="number" min="1" value="4" />
+        </div>
+        <div>
+          <label for="nInput">N: จำนวนกลุ่มตัวอย่าง</label>
+          <input id="nInput" type="number" min="1" value="5" />
+        </div>
+        <div>
+          <label for="mInput">M: จำนวนผู้ประเมิน</label>
+          <input id="mInput" type="number" min="2" value="3" />
+        </div>
+        <div>
+          <label for="iInput">I: จำนวนคะแนนที่เป็นไปได้</label>
+          <input id="iInput" type="number" min="2" value="4" />
+        </div>
+      </div>
+      <div class="buttons">
+        <button class="btn-primary" onclick="createTables()">สร้างตาราง</button>
+        <button class="btn-outline" onclick="resetAll()">เริ่มใหม่</button>
+      </div>
+    </div>
+
+    <div id="appArea"></div>
+  </div>
+
+  <script>
+    let K = 4;
+    let N = 5;
+    let M = 3;
+    let I = 4;
+    let created = false;
+    let scores = {};
+
+    function scoreKey(k, n, m) {
+      return `${k}-${n}-${m}`;
+    }
+
+    function getScore(k, n, m) {
+      const value = scores[scoreKey(k, n, m)];
+      return value === undefined ? '' : value;
+    }
+
+    function setScore(k, n, m, value) {
+      scores[scoreKey(k, n, m)] = value === '' ? '' : Number(value);
+      renderApp();
+    }
+
+    function createTables() {
+      K = Math.max(1, Number(document.getElementById('kInput').value) || 1);
+      N = Math.max(1, Number(document.getElementById('nInput').value) || 1);
+      M = Math.max(2, Number(document.getElementById('mInput').value) || 2);
+      I = Math.max(2, Number(document.getElementById('iInput').value) || 2);
+      created = true;
+      scores = {};
+      renderApp();
+    }
+
+    function resetAll() {
+      created = false;
+      scores = {};
+      document.getElementById('appArea').innerHTML = '';
+    }
+
+    function calculateMeans() {
+      const means = {};
+      for (let k = 1; k <= K; k++) {
+        for (let n = 1; n <= N; n++) {
+          let sum = 0;
+          let count = 0;
+          for (let m = 1; m <= M; m++) {
+            const value = getScore(k, n, m);
+            if (value !== '' && !Number.isNaN(Number(value))) {
+              sum += Number(value);
+              count++;
+            }
+          }
+          means[`${k}-${n}`] = count === M ? sum / M : null;
+        }
+      }
+      return means;
+    }
+
+    function calculateResult(means) {
+      let absSum = 0;
+      let filled = 0;
+      const totalCells = K * N * M;
+      const rowSums = {};
+      const columnSums = {};
+
+      for (let m = 1; m <= M; m++) rowSums[m] = 0;
+      for (let k = 1; k <= K; k++) {
+        for (let n = 1; n <= N; n++) columnSums[`${k}-${n}`] = 0;
+      }
+
+      for (let k = 1; k <= K; k++) {
+        for (let n = 1; n <= N; n++) {
+          const mean = means[`${k}-${n}`];
+          for (let m = 1; m <= M; m++) {
+            const value = getScore(k, n, m);
+            if (value !== '' && mean !== null) {
+              const absValue = Math.abs(Number(value) - mean);
+              absSum += absValue;
+              rowSums[m] += absValue;
+              columnSums[`${k}-${n}`] += absValue;
+              filled++;
+            }
+          }
+        }
+      }
+
+      const denominator = K * N * (M - 1) * (I - 1);
+      const rai = denominator > 0 && filled === totalCells ? 1 - absSum / denominator : null;
+      return { absSum, denominator, rai, filled, totalCells, rowSums, columnSums };
+    }
+
+    function tripleSumSymbol(small = false) {
+      const smallClass = small ? ' small-symbol' : '';
+      return `
+        <span class="triple-sum${smallClass}">
+          <span class="sum-group">
+            ${[['K', 'k=1'], ['N', 'n=1'], ['M', 'm=1']].map(([top, bottom]) => `
+              <span class="sigma-unit">
+                <span class="sigma-top">${top}</span>
+                <span class="sigma-main">∑</span>
+                <span class="sigma-bottom">${bottom}</span>
+              </span>
+            `).join('')}
+          </span>
+          <span class="abs-part">
+            <span class="abs-bar">|</span>
+            <span class="abs-text">R<sub>mnk</sub> − R̄<sub>nk</sub></span>
+            <span class="abs-bar">|</span>
+          </span>
+        </span>
+      `;
+    }
+
+    function raiFormula(numerator, denominator, fractionClass = '') {
+      return `
+        <div class="rai-formula">
+          <span>RAI</span>
+          <span>=</span>
+          <span>1 −</span>
+          <span class="fraction ${fractionClass}">
+            <span class="top">${numerator}</span>
+            <span class="bottom">${denominator}</span>
+          </span>
+        </div>
+      `;
+    }
+
+    function handleExcelPaste(event) {
+      event.preventDefault();
+      const text = event.clipboardData.getData('text');
+      const rows = text.trim().split(/\r?\n/).map(row => row.split(/\t|,/).map(cell => cell.trim()));
+      const nextScores = { ...scores };
+
+      for (let m = 1; m <= Math.min(M, rows.length); m++) {
+        const row = rows[m - 1];
+        for (let col = 0; col < Math.min(K * N, row.length); col++) {
+          const k = Math.floor(col / N) + 1;
+          const n = (col % N) + 1;
+          const value = row[col];
+          if (value !== '' && !Number.isNaN(Number(value))) {
+            nextScores[scoreKey(k, n, m)] = Number(value);
+          }
+        }
+      }
+
+      scores = nextScores;
+      renderApp();
+    }
+
+    function renderTable1(means) {
+      let html = `
+        <div class="card">
+          <h2>ตารางที่ 1: กรอกคะแนนประเมิน</h2>
+          <div class="excel-box">
+            <label>วางข้อมูลจาก Excel ได้ที่นี่</label>
+            <textarea id="excelPaste" placeholder="คัดลอกจาก Excel แล้ววาง เช่น\nแถว = R1, R2, R3...\nคอลัมน์ = Item1-S1, Item1-S2 ... Item${K}-S${N}"></textarea>
+            <p class="help-text">วิธีจัด Excel: ให้แถวเป็นผู้ประเมิน R และคอลัมน์เรียงเป็น Item1-S1 ถึง Item${K}-S${N} จากซ้ายไปขวา แล้วคัดลอกเฉพาะตัวเลขมาวาง</p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sticky-left">R</th>
+                  ${Array.from({length: K}, (_, i) => `<th colspan="${N}">Item${i + 1}</th>`).join('')}
+                </tr>
+                <tr>
+                  <th class="sticky-left"></th>
+                  ${Array.from({length: K}, (_, k) => Array.from({length: N}, (_, n) => `<th>S${n + 1}</th>`).join('')).join('')}
+                </tr>
+              </thead>
+              <tbody>
+      `;
+
+      for (let m = 1; m <= M; m++) {
+        html += `<tr><th class="sticky-left">R${m}</th>`;
+        for (let k = 1; k <= K; k++) {
+          for (let n = 1; n <= N; n++) {
+            html += `
+              <td>
+                <input class="score-input" type="number" min="1" max="${I}" value="${getScore(k, n, m)}" onchange="setScore(${k}, ${n}, ${m}, this.value)" />
+              </td>
+            `;
+          }
+        }
+        html += `</tr>`;
+      }
+
+      html += `<tr><th class="sticky-left mean-cell">mean</th>`;
+      for (let k = 1; k <= K; k++) {
+        for (let n = 1; n <= N; n++) {
+          const mean = means[`${k}-${n}`];
+          html += `<td class="mean-cell">${mean === null ? '-' : mean.toFixed(2)}</td>`;
+        }
+      }
+      html += `
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+      return html;
+    }
+
+    function renderTable2(means, result) {
+      let html = `
+        <div class="card">
+          <div class="table2-title">
+            <h2>ตารางที่ 2:</h2>
+            <span class="title-abs">
+              <span class="bar">|</span>
+              <span>R<sub>mnk</sub> − R̄<sub>nk</sub></span>
+              <span class="bar">|</span>
+            </span>
+            <span style="color:#64748b;">พร้อมผลรวม</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sticky-left">R</th>
+                  ${Array.from({length: K}, (_, i) => `<th colspan="${N}">Item${i + 1}</th>`).join('')}
+                  <th class="sum-cell" rowspan="2">รวม</th>
+                </tr>
+                <tr>
+                  <th class="sticky-left"></th>
+                  ${Array.from({length: K}, (_, k) => Array.from({length: N}, (_, n) => `<th>S${n + 1}</th>`).join('')).join('')}
+                </tr>
+              </thead>
+              <tbody>
+      `;
+
+      for (let m = 1; m <= M; m++) {
+        html += `<tr><th class="sticky-left">R${m}</th>`;
+        for (let k = 1; k <= K; k++) {
+          for (let n = 1; n <= N; n++) {
+            const score = getScore(k, n, m);
+            const mean = means[`${k}-${n}`];
+            const abs = score !== '' && mean !== null ? Math.abs(Number(score) - mean) : null;
+            html += `<td>${abs === null ? '-' : abs.toFixed(2)}</td>`;
+          }
+        }
+        html += `<td class="sum-cell">${result.rowSums[m].toFixed(2)}</td></tr>`;
+      }
+
+      html += `<tr><th class="sticky-left sum-cell">รวม</th>`;
+      for (let k = 1; k <= K; k++) {
+        for (let n = 1; n <= N; n++) {
+          html += `<td class="sum-cell">${result.columnSums[`${k}-${n}`].toFixed(2)}</td>`;
+        }
+      }
+      html += `<td class="sum-cell">${result.absSum.toFixed(2)}</td></tr>`;
+
+      html += `
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+      return html;
+    }
+
+    function renderSummary(result) {
+      return `
+        <div class="card">
+          <div class="summary-grid">
+            <div class="summary-card">
+              <div class="summary-label">จำนวนช่องที่กรอกครบ</div>
+              <div class="summary-value">${result.filled}/${result.totalCells}</div>
+            </div>
+            <div class="summary-card center">
+              <div style="color:#64748b; transform: scale(.95);">${tripleSumSymbol(true)}</div>
+              <div class="summary-value" style="font-size:24px;">${result.absSum.toFixed(2)}</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">ตัวหาร KN(M-1)(I-1)</div>
+              <div class="summary-value">${result.denominator.toFixed(2)}</div>
+            </div>
+            <div class="summary-card rai">
+              <div class="summary-label">ค่า RAI</div>
+              <div class="summary-value">${result.rai === null ? 'กรอกข้อมูลให้ครบ' : result.rai.toFixed(4)}</div>
+            </div>
+          </div>
+
+          <div class="formula-section">
+            <div class="formula-box white">
+              ${raiFormula(tripleSumSymbol(false), 'KN(M−1)(I−1)')}
+            </div>
+          </div>
+
+          ${result.rai !== null ? `
+            <div class="formula-box white" style="margin-top:18px;">
+              <h3>วิธีทำและการแทนค่าในสูตร</h3>
+              <div style="text-align:center; font-weight:700; font-size:18px; margin:18px 0;">
+                ${tripleSumSymbol(true)} = ${result.absSum.toFixed(2)}
+              </div>
+              <div class="formula-box">
+                ${raiFormula(tripleSumSymbol(false), 'KN(M−1)(I−1)')}
+              </div>
+              <div class="formula-box white">
+                <div class="calc-line">
+                  <span>RAI</span><span>=</span><span>1 −</span>
+                  <span class="fraction medium">
+                    <span class="top">${result.absSum.toFixed(2)}</span>
+                    <span class="bottom">${K} × ${N} × (${M} − 1) × (${I} − 1)</span>
+                  </span>
+                </div>
+                <div class="calc-line">
+                  <span>RAI</span><span>=</span><span>1 −</span>
+                  <span class="fraction small">
+                    <span class="top">${result.absSum.toFixed(2)}</span>
+                    <span class="bottom">${result.denominator.toFixed(2)}</span>
+                  </span>
+                </div>
+                <div class="final-line">
+                  RAI = 1 − ${(result.absSum / result.denominator).toFixed(4)} = <span class="green">${result.rai.toFixed(4)}</span>
+                </div>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function renderApp() {
+      if (!created) return;
+      const means = calculateMeans();
+      const result = calculateResult(means);
+      document.getElementById('appArea').innerHTML = renderTable1(means) + renderTable2(means, result) + renderSummary(result);
+      const pasteBox = document.getElementById('excelPaste');
+      if (pasteBox) pasteBox.addEventListener('paste', handleExcelPaste);
+    }
+  </script>
+</body>
+</html>
