@@ -442,15 +442,16 @@
           for (let m = 1; m <= M; m++) {
             const value = getScore(k, n, m);
             if (value !== '' && mean !== null) {
-              const absValue = Math.abs(Number(value) - mean);
-              absSum += absValue;
-              rowSums[m] += absValue;
-              columnSums[`${k}-${n}`] += absValue;
+              const absValue = roundUp2(Math.abs(Number(value) - mean));
+              rowSums[m] = roundUp2(rowSums[m] + absValue);
+              columnSums[`${k}-${n}`] = roundUp2(columnSums[`${k}-${n}`] + absValue);
               filled++;
             }
           }
         }
       }
+
+      absSum = Object.values(columnSums).reduce((sum, value) => roundUp2(sum + value), 0);
 
       const denominator = K * N * (M - 1) * (I - 1);
       const rai = denominator > 0 && filled === totalCells ? 1 - absSum / denominator : null;
